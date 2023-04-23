@@ -2,10 +2,20 @@ import express from "express";
 import dotenv from "dotenv";
 import { routes } from "./routes.js";
 import bodyParser from "body-parser";
-const app = express();
-
-
+import { ConnectDb } from "./config/db.js";
 dotenv.config({ path: '.env' });
+const app = express();
+ConnectDb();
+
+
+const middleware = (req, res, next) => {
+    // console.log('middleware');
+    req.user = 'Ali';
+    next();
+}
+
+app.use(middleware);
+
 app.use(bodyParser.json());
 routes(app);
 app.use((err, req, res, next) => {
@@ -13,7 +23,9 @@ app.use((err, req, res, next) => {
 });
 
 
+
 const port = process.env.PORT;
-app.listen(port, () => {
-    console.log(`🚀 Server started on port ${port}`);
+const hostnName = '127.0.0.1';
+app.listen(port, hostnName, () => {
+    console.log(`🚀 Server started on http://${hostnName}:${port}`);
 })
