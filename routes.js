@@ -5,4 +5,7 @@ export const routes = (app) => {
     app.get('/test', index_controller.index);
     app.get('/api/v1/jobs', jobs_controller.getJobs);
     app.post('/api/v1/job/add', jobs_controller.createJob);
+    app.get('/api/v1/jobs/:zipcode/:distance', jobs_controller.getNearbyJobs);
+    app.put('/api/v1/job/:id', jobs_controller.updateJob);
+    app.delete('/api/v1/job/:id', jobs_controller.deleteJob);
 }

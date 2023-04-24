@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import slugify from "slugify";
+// import { geoCoder } from "../utils/geocoder.js";
 
 
 const jobSchema = new mongoose.Schema({
@@ -122,6 +123,55 @@ jobSchema.pre('save', function (next) {
         lower: true
     });
     next();
+});
+
+
+jobSchema.pre('save', async function (next) {
+    // const loc = await geoCoder.geocode(this.address);
+    const loc = [
+        {
+            "street": "651 N 2nd St",
+            "adminArea6": "",
+            "adminArea6Type": "Neighborhood",
+            "adminArea5": "Oquawka",
+            "adminArea5Type": "City",
+            "adminArea4": "Henderson",
+            "adminArea4Type": "County",
+            "adminArea3": "IL",
+            "adminArea3Type": "State",
+            "adminArea1": "US",
+            "adminArea1Type": "Country",
+            "postalCode": "61469-8910",
+            "geocodeQualityCode": "L1CAA",
+            "geocodeQuality": "ADDRESS",
+            "dragPoint": false,
+            "sideOfStreet": "L",
+            "linkId": "0",
+            "unknownInput": "",
+            "type": "s",
+            "latLng": {
+                "lat": 40.94134,
+                "lng": -90.95292
+            },
+            "displayLatLng": {
+                "lat": 40.94139,
+                "lng": -90.95309
+            },
+            "mapUrl": ""
+        }
+    ];
+
+    const formattedAddress = `${loc[0].street},${loc[0].adminArea1Type},${loc[0].adminArea1}`;
+    this.location = {
+        type: 'Point',
+        coordinates: [loc[0].latLng.lng, loc[0].latLng.lat],
+        formattedAddress,
+        city: loc[0].adminArea5,
+        state: loc[0].adminArea3Type,
+        zipcode: loc[0].postalCode,
+        country: loc[0].adminArea1
+    }
+    // next();
 })
 
 export const Job = mongoose.model('Job', jobSchema);
