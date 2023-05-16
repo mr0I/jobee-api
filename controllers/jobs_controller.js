@@ -10,8 +10,31 @@ class JobsController {
 
         res.status(200).json({
             message: 'jobs list...',
+            count: jobs.length,
             data: jobs
         })
+    }
+
+    static async getJob(req, res, next) {
+        const { id, slug } = req.params;
+
+        try {
+            // const job = await Job.findById(req.params.id);
+            const job = await Job.find({
+                $and: [
+                    { _id: id },
+                    { slug: slug }
+                ]
+            });
+            res.status(200).json({
+                data: job
+            })
+        } catch (error) {
+            console.log({ 'source': 'getJob', 'msg': error });
+            res.status(404).json({
+                message: 'Job not found!'
+            })
+        }
     }
 
     static async createJob(req, res, next) {
@@ -91,6 +114,34 @@ class JobsController {
             'data': jobs,
             'loc': loc
         });
+    }
+
+    static async getStats(req, res, next) {
+        const topic = req.params.topic;
+        const stats = await Job.aggregate([
+            { $match: { $text: { $search: topic } } },
+            // { $match: { $text: { $search: "\"" + topic + "\"" } } },
+            {
+                $group: {
+                    _id: { $toUpper: '$experience' },
+                    totalJobs: { $sum: 1 },
+                    avgPositions: { $avg: '$positions' },
+                    avgSalary: { $avg: '$salary' },
+                    minSalary: { $min: '$salary' },
+                    maxSalary: { $max: '$salary' },
+                }
+            }
+        ]);
+
+        if (stats.length === 0) {
+            res.status(200).json({
+                message: `No stats found for ${topic}`
+            })
+        }
+
+        res.status(200).json({
+            data: stats
+        })
     }
 }
 

@@ -8,4 +8,6 @@ export const routes = (app) => {
     app.get('/api/v1/jobs/:zipcode/:distance', jobs_controller.getNearbyJobs);
     app.put('/api/v1/job/:id', jobs_controller.updateJob);
     app.delete('/api/v1/job/:id', jobs_controller.deleteJob);
+    app.get('/api/v1/job/:id/:slug', jobs_controller.getJob);
+    app.get('/api/v1/stats/:topic', jobs_controller.getStats);
 }
