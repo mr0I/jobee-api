@@ -1,5 +1,6 @@
 import { Job } from "../models/jobs.js";
 import { geoCoder } from "../utils/geocoder.js";
+import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 
 
@@ -73,19 +74,22 @@ class JobsController {
 
     static async getNearbyJobs(req, res, next) {
         const { zipcode, distance } = req.params;
-
-        const loc = await geoCoder.geocode(zipcode);
-        const latitude = loc[0].latitude;
-        const longitude = loc[0].longitude;
-
+        const loc = await nominatimClient.search({
+            q: zipcode, // zipcode or address or etc
+            addressdetails: '1'
+        });
+        const latitude = loc[0].lat;
+        const longitude = loc[0].lon;
         const radius = distance / 3963;
+
         const jobs = await Job.find({
             location: { $geoWithin: { $centerSphere: [[longitude, latitude], radius] } }
         });
 
         res.status(200).json({
-            count: jobs.length,
-            data: jobs
+            'count': jobs.length,
+            'data': jobs,
+            'loc': loc
         });
     }
 }

@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import { routes } from "./routes.js";
 import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
+import http from "http";
+
+http.Agent({ maxSockets: 100 });
 dotenv.config({ path: '.env' });
 const app = express();
 ConnectDb();
