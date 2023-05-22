@@ -2,6 +2,7 @@ import { Job } from "../models/jobs.js";
 import { geoCoder } from "../utils/geocoder.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
+import { errorHandler } from "../utils/errorHandler.js";
 
 
 class JobsController {
@@ -55,10 +56,10 @@ class JobsController {
         }
         const job = await Job.findById(req.params.id);
         if (!job) {
-            console.log('1');
-            return res.status(404).json({
-                message: 'job not found!'
-            });
+            return next(new errorHandler('job not found!', 404));
+            // return res.status(404).json({
+            //     message: 'job not found!'
+            // });
         }
 
         const data = await Job.findOneAndUpdate(req.params.id, req.body, {

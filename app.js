@@ -4,6 +4,7 @@ import { routes } from "./routes.js";
 import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
 import http from "http";
+import { errorMiddleware } from "./middlewares/errors.js";
 
 http.Agent({ maxSockets: 100 });
 dotenv.config({ path: '.env' });
@@ -11,21 +12,22 @@ const app = express();
 ConnectDb();
 
 
-const middleware = (req, res, next) => {
-    // console.log('middleware');
-    req.user = 'Ali';
-    next();
-}
+// const middleware = (req, res, next) => {
+//     // console.log('middleware');
+//     req.user = 'Ali';
+//     next();
+// }
+// app.use(middleware);
 
-app.use(middleware);
 
 app.use(bodyParser.json());
 routes(app);
-app.use((err, req, res, next) => {
-    res.status(422).send({ error: err.message });
-});
+// app.use((err, req, res, next) => {
+//     res.status(422).send({ error: err.message });
+// });
 
-
+/** Middleware to handle errors */
+app.use(errorMiddleware);
 
 const port = process.env.PORT;
 const hostnName = '127.0.0.1';
