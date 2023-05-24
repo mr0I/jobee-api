@@ -4,12 +4,20 @@ import { routes } from "./routes.js";
 import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
 import http from "http";
-import { errorMiddleware } from "./middlewares/errors.js";
+import errorMiddleware from "./middlewares/errors.js";
+import ErrorHandler from "./utils/errorHandler.js";
 
 http.Agent({ maxSockets: 100 });
 dotenv.config({ path: '.env' });
 const app = express();
 ConnectDb();
+
+// Handling Uncaught Exception
+process.on('uncaughtException', err => {
+    console.log(`ERROR: ${err.message}`);
+    console.log('Shutting down due to uncaught exception.')
+    process.exit(1);
+});
 
 
 // const middleware = (req, res, next) => {
@@ -22,15 +30,27 @@ ConnectDb();
 
 app.use(bodyParser.json());
 routes(app);
-// app.use((err, req, res, next) => {
-//     res.status(422).send({ error: err.message });
-// });
+
+// Handle unhandled routes
+app.all('*', (req, res, next) => {
+    next(new ErrorHandler(`${req.originalUrl} route not found`, 404));
+});
 
 /** Middleware to handle errors */
 app.use(errorMiddleware);
 
 const port = process.env.PORT;
-const hostnName = '127.0.0.1';
-app.listen(port, hostnName, () => {
-    console.log(`🚀 Server started on http://${hostnName}:${port}`);
-})
+const hostName = '127.0.0.1';
+const server = app.listen(port, hostName, () => {
+    console.log(`🚀 Server started on http://${hostName}:${port}`);
+});
+
+// Handling Unhandled Promise Rejection
+process.on('unhandledRejection', err => {
+    console.log(`Error: ${err.message}`);
+    console.log('Shutting down the server due to Unhandled promise rejection.')
+    server.close(() => {
+        process.exit(1);
+    })
+});
+

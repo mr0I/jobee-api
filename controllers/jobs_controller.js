@@ -2,11 +2,13 @@ import { Job } from "../models/jobs.js";
 import { geoCoder } from "../utils/geocoder.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
-import { errorHandler } from "../utils/errorHandler.js";
+import ErrorHandler from "../utils/errorHandler.js";
+import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 
 
 class JobsController {
-    static async getJobs(req, res, next) {
+
+    static getJobs = asyncErrorHandler(async (req, res, next) => {
         const jobs = await Job.find();
 
         res.status(200).json({
@@ -14,9 +16,9 @@ class JobsController {
             count: jobs.length,
             data: jobs
         })
-    }
+    });
 
-    static async getJob(req, res, next) {
+    static getJob = asyncErrorHandler(async (req, res, next) => {
         const { id, slug } = req.params;
 
         try {
@@ -36,9 +38,9 @@ class JobsController {
                 message: 'Job not found!'
             })
         }
-    }
+    });
 
-    static async createJob(req, res, next) {
+    static createJob = asyncErrorHandler(async (req, res, next) => {
         const job = await Job.create(req.body);
 
         res.status(201).json({
@@ -46,9 +48,10 @@ class JobsController {
             message: 'job created :)',
             data: job
         })
-    }
+    });
 
-    static async updateJob(req, res, next) {
+
+    static updateJob = asyncErrorHandler(async (req, res, next) => {
         if (!validator.isMongoId(req.params.id)) {
             return res.status(400).json({
                 message: 'invalid ID!'
@@ -56,10 +59,7 @@ class JobsController {
         }
         const job = await Job.findById(req.params.id);
         if (!job) {
-            return next(new errorHandler('job not found!', 404));
-            // return res.status(404).json({
-            //     message: 'job not found!'
-            // });
+            return next(new ErrorHandler('job not found!', 404));
         }
 
         const data = await Job.findOneAndUpdate(req.params.id, req.body, {
@@ -72,9 +72,10 @@ class JobsController {
             message: 'successfully updated.',
             data
         });
-    }
+    });
 
-    static async deleteJob(req, res, next) {
+
+    static deleteJob = asyncErrorHandler(async (req, res, next) => {
         if (!validator.isMongoId(req.params.id)) {
             return res.status(400).json({
                 message: 'invalid ID!'
@@ -94,9 +95,10 @@ class JobsController {
             message: 'successfully deleted.',
             data
         });
-    }
+    });
 
-    static async getNearbyJobs(req, res, next) {
+
+    static getNearbyJobs = asyncErrorHandler(async (req, res, next) => {
         const { zipcode, distance } = req.params;
         const loc = await nominatimClient.search({
             q: zipcode, // zipcode or address or etc
@@ -115,9 +117,9 @@ class JobsController {
             'data': jobs,
             'loc': loc
         });
-    }
+    });
 
-    static async getStats(req, res, next) {
+    static getStats = asyncErrorHandler(async (req, res, next) => {
         const topic = req.params.topic;
         const stats = await Job.aggregate([
             { $match: { $text: { $search: topic } } },
@@ -143,7 +145,8 @@ class JobsController {
         res.status(200).json({
             data: stats
         })
-    }
+    })
+
 }
 
 
