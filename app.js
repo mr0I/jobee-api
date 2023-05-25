@@ -4,8 +4,11 @@ import { routes } from "./routes.js";
 import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
 import http from "http";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 import errorMiddleware from "./middlewares/errors.js";
 import ErrorHandler from "./utils/errorHandler.js";
+const argv = yargs(hideBin(process.argv)).argv
 
 http.Agent({ maxSockets: 100 });
 dotenv.config({ path: '.env' });
@@ -26,6 +29,9 @@ process.on('uncaughtException', err => {
 //     next();
 // }
 // app.use(middleware);
+
+global.isDev = argv['dev'];
+global.isProd = argv['prod'];
 
 
 app.use(bodyParser.json());

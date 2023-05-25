@@ -4,12 +4,14 @@ import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
 import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
+import ApiFilters from "../utils/apiFilters.js";
 
 
 class JobsController {
 
     static getJobs = asyncErrorHandler(async (req, res, next) => {
-        const jobs = await Job.find();
+        const apiFilters = new ApiFilters(Job.find(), req.query).filter();
+        const jobs = await apiFilters.query;
 
         res.status(200).json({
             message: 'jobs list...',
@@ -33,10 +35,7 @@ class JobsController {
                 data: job
             })
         } catch (error) {
-            console.log({ 'source': 'getJob', 'msg': error });
-            res.status(404).json({
-                message: 'Job not found!'
-            })
+            return next(new ErrorHandler('job not found!', 404));
         }
     });
 
@@ -50,13 +49,12 @@ class JobsController {
         })
     });
 
-
     static updateJob = asyncErrorHandler(async (req, res, next) => {
-        if (!validator.isMongoId(req.params.id)) {
-            return res.status(400).json({
-                message: 'invalid ID!'
-            });
-        }
+        // if (!validator.isMongoId(req.params.id)) {
+        //     return res.status(400).json({
+        //         message: 'invalid ID!'
+        //     });
+        // }
         const job = await Job.findById(req.params.id);
         if (!job) {
             return next(new ErrorHandler('job not found!', 404));
@@ -83,10 +81,7 @@ class JobsController {
         }
         const job = await Job.findById(req.params.id);
         if (!job) {
-            console.log('1');
-            return res.status(404).json({
-                message: 'job not found!'
-            });
+            return next(new ErrorHandler('job not found!', 404));
         }
 
         const data = await Job.findByIdAndRemove(req.params.id);
@@ -137,9 +132,7 @@ class JobsController {
         ]);
 
         if (stats.length === 0) {
-            res.status(200).json({
-                message: `No stats found for ${topic}`
-            })
+            return next(new ErrorHandler(`No stats found for ${topic}`, 404));
         }
 
         res.status(200).json({
