@@ -10,7 +10,12 @@ import ApiFilters from "../utils/apiFilters.js";
 class JobsController {
 
     static getJobs = asyncErrorHandler(async (req, res, next) => {
-        const apiFilters = new ApiFilters(Job.find(), req.query).filter();
+        const apiFilters = new ApiFilters(Job.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .searchByQuery()
+            .pagination();
         const jobs = await apiFilters.query;
 
         res.status(200).json({
@@ -72,7 +77,6 @@ class JobsController {
         });
     });
 
-
     static deleteJob = asyncErrorHandler(async (req, res, next) => {
         if (!validator.isMongoId(req.params.id)) {
             return res.status(400).json({
@@ -91,7 +95,6 @@ class JobsController {
             data
         });
     });
-
 
     static getNearbyJobs = asyncErrorHandler(async (req, res, next) => {
         const { zipcode, distance } = req.params;
