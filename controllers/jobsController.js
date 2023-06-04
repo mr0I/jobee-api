@@ -1,5 +1,4 @@
 import { Job } from "../models/jobs.js";
-import { geoCoder } from "../utils/geocoder.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";

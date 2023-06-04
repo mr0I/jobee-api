@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { routes } from "./routes.js";
+import { routes } from "./routes/index.js";
 import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
 import http from "http";
@@ -21,6 +21,7 @@ process.on('uncaughtException', err => {
     console.log('Shutting down due to uncaught exception.')
     process.exit(1);
 });
+
 
 
 // const middleware = (req, res, next) => {
