@@ -8,6 +8,7 @@ import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import errorMiddleware from "./middlewares/errors.js";
 import ErrorHandler from "./utils/errorHandler.js";
+import cookieParser from "cookie-parser";
 const argv = yargs(hideBin(process.argv)).argv
 
 http.Agent({ maxSockets: 100 });
@@ -22,8 +23,6 @@ process.on('uncaughtException', err => {
     process.exit(1);
 });
 
-
-
 // const middleware = (req, res, next) => {
 //     // console.log('middleware');
 //     req.user = 'Ali';
@@ -36,6 +35,7 @@ global.isProd = argv['prod'];
 
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 routes(app);
 
 // Handle unhandled routes
