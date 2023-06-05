@@ -1,4 +1,4 @@
-import { Job } from "../models/jobs.js";
+import { Job } from "../models/Job.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
@@ -44,6 +44,7 @@ class JobsController {
     });
 
     static createJob = asyncErrorHandler(async (req, res, next) => {
+        req.body.user = req.user.id;
         const job = await Job.create(req.body);
 
         res.status(201).json({

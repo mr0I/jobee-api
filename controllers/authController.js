@@ -1,4 +1,4 @@
-import User from "../models/users.js";
+import User from "../models/User.js";
 import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import sendToken from "../utils/jwtToken.js";
