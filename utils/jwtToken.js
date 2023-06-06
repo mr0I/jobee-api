@@ -13,8 +13,6 @@ const sendToken = (user, statusCode, res) => {
             success: true,
             token
         });
-
-
 }
 
 export default sendToken;

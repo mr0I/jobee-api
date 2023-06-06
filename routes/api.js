@@ -24,4 +24,7 @@ export const api = (app) => {
     app.get(`${constants.apiBaseUrl}/stats/:topic`, jobs_controller.getStats);
     app.post(`${constants.apiBaseUrl}/register`, auth_controller.registerUser);
     app.post(`${constants.apiBaseUrl}/login`, auth_controller.loginUser);
+    app.post(`${constants.apiBaseUrl}/password/reset`, auth_controller.forgotPassword);
+    app.put(`${constants.apiBaseUrl}/password/reset/:token`, auth_controller.resetPassword);
+    app.get(`${constants.apiBaseUrl}/logout`, authMiddleware.isAuth, auth_controller.logout);
 }

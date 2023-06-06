@@ -24,7 +24,6 @@ process.on('uncaughtException', err => {
 });
 
 // const middleware = (req, res, next) => {
-//     // console.log('middleware');
 //     req.user = 'Ali';
 //     next();
 // }

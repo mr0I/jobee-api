@@ -2,6 +2,8 @@ import User from "../models/User.js";
 import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import sendToken from "../utils/jwtToken.js";
+import sendEmail from "../utils/sendEmail.js";
+import crypto from "crypto";
 
 
 class AuthController {
@@ -13,8 +15,6 @@ class AuthController {
             password,
             role
         });
-
-        const token = user.getJwtToken();
 
         sendToken(user, 200, res);
     });
@@ -34,15 +34,78 @@ class AuthController {
         if (!isPasswordMatched) {
             return next(new ErrorHandler('Invalid Email or Password', 401));
         }
-        //const token = user.getJwtToken();
-
-        // res.status(200).json({
-        //     message: 'user loggedin :D',
-        //     token
-        // })
 
         sendToken(user, 200, res);
     })
+
+    static forgotPassword = asyncErrorHandler(async (req, res, next) => {
+        const user = await User.findOne({
+            email: req.body.email
+        });
+        if (!user) {
+            return next(new ErrorHandler('No user found for this email'), 404);
+        }
+
+        const resetToken = user.getResetPasswordToken();
+        await user.save({ validateBeforeSave: false });
+
+        const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/password/reset/${resetToken}`;
+        const message = `Your password reset link is as follow:\n\n${resetUrl}\n\n If you have not request this, then please ignore that.`
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Jobbee-API Password Recovery',
+                message
+            });
+
+            res.status(200).json({
+                success: true,
+                message: `Email sent successfully to: ${user.email}`
+            });
+        } catch (error) {
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save({ validateBeforeSave: false });
+
+            return next(new ErrorHandler('Email is not sent.'), 500);
+        }
+    });
+
+    static resetPassword = asyncErrorHandler(async (req, res, next) => {
+        const resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(req.params.token)
+            .digest('hex');
+
+        const user = await User.findOne({
+            resetPasswordToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+        if (!user) {
+            return next(new ErrorHandler('Reset password token is invalid or expired!', 400));
+        }
+
+        // Setup new password
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        sendToken(user, 200, res);
+    });
+
+    static logout = asyncErrorHandler(async (req, res, next) => {
+        res.cookie('token', 'none', {
+            expires: new Date(Date.now()),
+            httpOnly: true
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully.'
+        });
+    });
 }
 
 export const auth_controller = AuthController;

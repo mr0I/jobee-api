@@ -3,13 +3,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 export default (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
 
-    console.log('errors', process.env.NODE_ENV);
-    console.log('yargs1', global.isDev);
-    console.log('yargs2', global.isProd);
-
     if (global.isDev) {
-        console.log('dev');
-
         res.status(err.statusCode).json({
             success: false,
             error: err,
@@ -18,7 +12,6 @@ export default (err, req, res, next) => {
         });
     }
     if (global.isProd) {
-        console.log('prod');
         let error = { ...err };
         error.message = err.message;
 
@@ -38,6 +31,18 @@ export default (err, req, res, next) => {
         if (err.code === 11000) {
             const message = `Duplicate ${Object.keys(err.keyValue)} entered.`;
             error = new ErrorHandler(message, 400);
+        }
+
+        // Handling Wrong JWT token error
+        if (err.name === 'JsonWebTokenError') {
+            const message = 'JSON Web token is invalid. Try Again!';
+            error = new ErrorHandler(message, 500);
+        }
+
+        // Handling Expired JWT token error
+        if (err.name === 'TokenExpiredError') {
+            const message = 'JSON Web token is expired. Try Again!';
+            error = new ErrorHandler(message, 500);
         }
 
         res.status(error.statusCode).json({
