@@ -9,6 +9,7 @@ import { hideBin } from "yargs/helpers";
 import errorMiddleware from "./middlewares/errors.js";
 import ErrorHandler from "./utils/errorHandler.js";
 import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
 const argv = yargs(hideBin(process.argv)).argv
 
 http.Agent({ maxSockets: 100 });
@@ -35,6 +36,7 @@ global.isProd = argv['prod'];
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(fileUpload());
 routes(app);
 
 // Handle unhandled routes
