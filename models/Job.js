@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import slugify from "slugify";
-// import { geoCoder } from "../utils/geocoder.js";
 
 
 const jobSchema = new mongoose.Schema({
@@ -179,4 +178,6 @@ jobSchema.pre('save', async function (next) {
     // next();
 })
 
-export const Job = mongoose.model('Job', jobSchema);
+const Job = mongoose.model('Job', jobSchema);
+
+export default Job;

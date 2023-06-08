@@ -36,4 +36,20 @@ export const api = (app) => {
     app.put(`${constants.apiBaseUrl}/password/update`, authMiddleware.isAuth, user_controller.updatePassword);
     app.put(`${constants.apiBaseUrl}/me/update`, authMiddleware.isAuth, user_controller.updateUser);
     app.delete(`${constants.apiBaseUrl}/me/delete`, authMiddleware.isAuth, user_controller.deleteUser);
+    app.get(`${constants.apiBaseUrl}/jobs/applied`,
+        authMiddleware.isAuth,
+        authMiddleware.authrizeRoles('user'),
+        user_controller.getAppliedJobs);
+    app.get(`${constants.apiBaseUrl}/jobs/published`,
+        authMiddleware.isAuth,
+        authMiddleware.authrizeRoles('employer', 'admin'),
+        user_controller.getPublishedJobs);
+    app.get(`${constants.apiBaseUrl}/users`,
+        authMiddleware.isAuth,
+        authMiddleware.authrizeRoles('admin'),
+        user_controller.getUsers);
+    app.delete(`${constants.apiBaseUrl}/user/:id`,
+        authMiddleware.isAuth,
+        authMiddleware.authrizeRoles('admin'),
+        user_controller.deleteUserAdmin);
 }

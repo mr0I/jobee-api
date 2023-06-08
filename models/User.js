@@ -36,7 +36,11 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date
-});
+},
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    });
 
 // Encypting passwords before saving
 userSchema.pre('save', async function (next) {
@@ -72,6 +76,14 @@ userSchema.methods.getResetPasswordToken = function () {
 
     return resetToken;
 }
+// Show all jobs create by user using virtuals
+userSchema.virtual('jobsPublished', {
+    ref: 'Job',
+    localField: '_id',
+    foreignField: 'user',
+    justOne: false
+});
+
 
 const User = mongoose.model('User', userSchema);
 User.createIndexes();

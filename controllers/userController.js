@@ -1,12 +1,24 @@
 import User from "../models/User.js";
+import Job from "../models/Job.js";
 import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import sendToken from "../utils/jwtToken.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import APIFilters from "../utils/apiFilters.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 class UserController {
     static getUserProfile = asyncErrorHandler(async (req, res, next) => {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id)
+            .populate({
+                path: 'jobsPublished',
+                select: 'title postingDate'
+            });
 
         res.status(200).json({
             success: true,
@@ -44,10 +56,9 @@ class UserController {
     });
 
     static deleteUser = asyncErrorHandler(async (req, res, next) => {
-        //deleteUserData(req.user.id, req.user.role);
+        deleteUserData(req.user.id, req.user.role);
 
         const user = await User.findByIdAndDelete(req.user.id);
-
         res.cookie('token', 'none', {
             expires: new Date(Date.now()),
             httpOnly: true
@@ -57,6 +68,57 @@ class UserController {
             success: true,
             message: 'Your account has been deleted.'
         })
+    });
+
+    static getAppliedJobs = asyncErrorHandler(async (req, res, next) => {
+        const jobs = await Job.find({ 'applicantsApplied.id': req.user.id }).select('+applicantsApplied');
+
+        res.status(200).json({
+            success: true,
+            count: jobs.length,
+            data: jobs
+        })
+    });
+
+    static getPublishedJobs = asyncErrorHandler(async (req, res, next) => {
+        const jobs = await Job.find({ user: req.user.id });
+
+        res.status(200).json({
+            success: true,
+            count: jobs.length,
+            data: jobs
+        })
+    });
+
+    static getUsers = asyncErrorHandler(async (req, res, next) => {
+        const apiFilters = new APIFilters(User.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .pagination();
+
+        const users = await apiFilters.query;
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        })
+    });
+
+    static deleteUserAdmin = asyncErrorHandler(async (req, res, next) => {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return next(new ErrorHandler(`User not found with id: ${req.params.id}`, 404));
+        }
+
+        deleteUserData(user.id, user.role);
+        await user.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: 'User is deleted by Admin.'
+        });
     });
 }
 

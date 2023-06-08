@@ -1,10 +1,11 @@
-import { Job } from "../models/Job.js";
+import Job from "../models/Job.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
 import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 import ApiFilters from "../utils/apiFilters.js";
 import path from "path";
+import fs from "fs";
 
 
 class JobsController {
@@ -29,13 +30,16 @@ class JobsController {
         const { id, slug } = req.params;
 
         try {
-            // const job = await Job.findById(req.params.id);
             const job = await Job.find({
                 $and: [
                     { _id: id },
                     { slug: slug }
                 ]
+            }).populate({
+                path: 'user',
+                select: 'name'
             });
+
             res.status(200).json({
                 data: job
             })
@@ -66,6 +70,11 @@ class JobsController {
             return next(new ErrorHandler('job not found!', 404));
         }
 
+        // Check if the user is owner
+        if (job.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return next(new ErrorHandler(`User(${req.user.id}) is not allowed to update this job.`))
+        }
+
         const data = await Job.findOneAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
@@ -79,14 +88,21 @@ class JobsController {
     });
 
     static deleteJob = asyncErrorHandler(async (req, res, next) => {
-        if (!validator.isMongoId(req.params.id)) {
-            return res.status(400).json({
-                message: 'invalid ID!'
-            });
-        }
-        const job = await Job.findById(req.params.id);
+        const job = await Job.findById(req.params.id).select('+applicantsApplied');
         if (!job) {
             return next(new ErrorHandler('job not found!', 404));
+        }
+        // Check if the user is owner
+        if (job.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return next(new ErrorHandler(`User(${req.user.id}) is not allowed to delete this job.`))
+        }
+        // Deleting files associated with job
+        for (let i = 0; i < job.applicantsApplied.length; i++) {
+            let filepath = `${__dirname}/public/uploads/${job.applicantsApplied[i].resume}`.replace('\\controllers', '');
+
+            fs.unlink(filepath, err => {
+                if (err) return console.log(err);
+            });
         }
 
         const data = await Job.findByIdAndRemove(req.params.id);
