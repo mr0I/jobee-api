@@ -10,6 +10,9 @@ import errorMiddleware from "./middlewares/errors.js";
 import ErrorHandler from "./utils/errorHandler.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
 const argv = yargs(hideBin(process.argv)).argv
 
 http.Agent({ maxSockets: 100 });
@@ -33,10 +36,21 @@ process.on('uncaughtException', err => {
 global.isDev = argv['dev'];
 global.isProd = argv['prod'];
 
+/** Setup Security Headers */
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(fileUpload());
+
+/** Sanitize Data */
+app.use(mongoSanitize());
+/** Rate Limit */
+app.use(rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 mins
+    max: 100
+}));
+
 routes(app);
 
 // Handle unhandled routes
@@ -46,6 +60,8 @@ app.all('*', (req, res, next) => {
 
 /** Middleware to handle errors */
 app.use(errorMiddleware);
+
+
 
 const port = process.env.PORT;
 const hostName = '127.0.0.1';

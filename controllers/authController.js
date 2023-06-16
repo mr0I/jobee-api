@@ -4,6 +4,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import sendToken from "../utils/jwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
+import { sanitizeObject } from "../utils/helpers.js";
 
 
 class AuthController {
@@ -20,7 +21,7 @@ class AuthController {
     });
 
     static loginUser = asyncErrorHandler(async (req, res, next) => {
-        const { email, password } = req.body;
+        const { email, password } = await sanitizeObject(req.body);
 
         if (!email || !password) {
             return next(new ErrorHandler('Please Enter email and password', 400));
