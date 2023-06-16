@@ -13,6 +13,9 @@ import fileUpload from "express-fileupload";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
+import cors from "cors";
+
 const argv = yargs(hideBin(process.argv)).argv
 
 http.Agent({ maxSockets: 100 });
@@ -45,11 +48,18 @@ app.use(fileUpload());
 
 /** Sanitize Data */
 app.use(mongoSanitize());
+/** Prevent HTTP Parameter Pollution attacks */
+app.use(hpp({
+    whitelist: ['positions']
+}));
 /** Rate Limit */
 app.use(rateLimit({
     windowMs: 10 * 60 * 1000, // 10 mins
     max: 100
 }));
+
+/** Setup Cors */
+app.use(cors());
 
 routes(app);
 
