@@ -43,6 +43,10 @@ global.isProd = argv['prod'];
 app.use(helmet());
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+
 app.use(cookieParser());
 app.use(fileUpload());
 
