@@ -5,11 +5,31 @@ import sendToken from "../utils/jwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
 import { sanitizeObject } from "../utils/helpers.js";
+import Joi from "joi";
+
+
+const userCreateSchema = Joi.object({
+    name: Joi.string().alphanum().min(3).max(30).required(),
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
+    password: Joi.string()
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+    // repeat_password: Joi.ref('password'),
+    role: Joi.string().optional()
+})
 
 
 class AuthController {
     static registerUser = asyncErrorHandler(async (req, res, next) => {
-        const { name, email, password, role } = req.body;
+        const { error, value } = userCreateSchema.validate(req.body);
+        const { name, email, password, role } = value;
+
+        if (error) {
+            return res.status(400).json({
+                'success': false,
+                'error': error.message
+            })
+        }
+
         const user = await User.create({
             name,
             email,

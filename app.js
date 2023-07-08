@@ -15,6 +15,10 @@ import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
 import cors from "cors";
+import favicon from "serve-favicon";
+import path from "path";
+import { fileURLToPath } from "url";
+
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -38,13 +42,16 @@ process.on('uncaughtException', err => {
 
 global.isDev = argv['dev'];
 global.isProd = argv['prod'];
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /** Setup Security Headers */
 app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(favicon(path.join(__dirname, './public/assets', 'favicon.ico')));
+
 
 
 app.use(cookieParser());
