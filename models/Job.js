@@ -123,6 +123,10 @@ const jobSchema = new mongoose.Schema({
 });
 
 jobSchema.pre('save', function (next) {
+    // this.slug =  this.title
+    //     .replace(/[^0-9a-zآ-ی\s]/gi, '')
+    //     .replace(/\s/gi,'-')
+    //     .toLowerCase();
     this.slug = slugify(this.title, {
         lower: true
     });

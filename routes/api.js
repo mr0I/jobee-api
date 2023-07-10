@@ -4,6 +4,7 @@ import { auth_controller } from "../controllers/authController.js";
 import { user_controller } from "../controllers/userController.js";
 // middlwares
 import { authMiddleware } from "../middlewares/auth.js";
+import limiter from "../utils/limiter.js";
 
 
 export const api = (app) => {
@@ -21,7 +22,7 @@ export const api = (app) => {
         authMiddleware.isAuth,
         authMiddleware.authrizeRoles('employer', 'admin'),
         jobs_controller.deleteJob);
-    app.get(`${constants.apiBaseUrl}/job/:id/:slug`, jobs_controller.getJob);
+    app.get(`${constants.apiBaseUrl}/job/:id/:slug`, limiter.apiLimiter, jobs_controller.getJob);
     app.put(`${constants.apiBaseUrl}/job/:id/apply`,
         authMiddleware.isAuth,
         authMiddleware.authrizeRoles('user'),
