@@ -6,18 +6,33 @@ import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
 import ApiFilters from "../utils/apiFilters.js";
 import path from "path";
 import fs from "fs";
+import constants from "../config/constants.js";
+import nodeCache from 'node-cache';
+const apiCache = new nodeCache();
 
 
 class JobsController {
 
     static getJobs = asyncErrorHandler(async (req, res, next) => {
+        const cacheKey = `getJobs`;
+        const cachedResult = apiCache.get(cacheKey);
+        if (cachedResult) {
+            return res.status(200).json({
+                message: 'jobs list...',
+                count: cachedResult.length,
+                data: cachedResult
+            });
+        }
+
         const apiFilters = new ApiFilters(Job.find(), req.query)
             .filter()
             .sort()
             .limitFields()
             .searchByQuery()
             .pagination();
+
         const jobs = await apiFilters.query;
+        apiCache.set(cacheKey, jobs, constants.cacheTimeToLive);
 
         res.status(200).json({
             message: 'jobs list...',

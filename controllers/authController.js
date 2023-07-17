@@ -21,14 +21,13 @@ const userCreateSchema = Joi.object({
 class AuthController {
     static registerUser = asyncErrorHandler(async (req, res, next) => {
         const { error, value } = userCreateSchema.validate(req.body);
-        const { name, email, password, role } = value;
-
         if (error) {
             return res.status(400).json({
                 'success': false,
                 'error': error.message
             })
         }
+        const { name, email, password, role } = value;
 
         const user = await User.create({
             name,
@@ -42,8 +41,6 @@ class AuthController {
 
     static loginUser = asyncErrorHandler(async (req, res, next) => {
         const { email, password } = await sanitizeObject(req.body);
-
-        console.log(email);
 
         if (!email || !password) {
             return next(new ErrorHandler('Please Enter email and password', 400));

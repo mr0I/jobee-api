@@ -13,7 +13,6 @@ const isAuth = asyncErrorHandler(async (req, res, next) => {
         return next(new ErrorHandler('Login first to access this resource.', 401));
     }
 
-    // const decoded = ;
     req.user = await User.findById((jwt.verify(token, process.env.JWT_SECRET)).id);
     next();
 })

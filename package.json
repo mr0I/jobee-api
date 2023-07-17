@@ -27,6 +27,7 @@
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.4",
+    "node-cache": "^5.1.2",
     "node-geocoder": "^4.2.0",
     "nodemailer": "^6.9.3",
     "nominatim-client": "^3.2.1",
