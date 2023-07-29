@@ -3,5 +3,5 @@ import limiter from "../utils/limiter.js";
 
 
 export const web = (app) => {
-    app.get(`/test`, limiter.pageLimiter, index_controller.index);
+    app.get(`/home`, limiter.pageLimiter, index_controller.home);
 }

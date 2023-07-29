@@ -1,27 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import { routes } from "./routes/index.js";
-import bodyParser from "body-parser";
 import { ConnectDb } from "./config/db.js";
 import http from "http";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import errorMiddleware from "./middlewares/errors.js";
-import ErrorHandler from "./utils/errorHandler.js";
-import cookieParser from "cookie-parser";
-import fileUpload from "express-fileupload";
-import rateLimit from "express-rate-limit";
-import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import hpp from "hpp";
-import cors from "cors";
-import favicon from "serve-favicon";
-import path from "path";
-import { fileURLToPath } from "url";
 
 
 const argv = yargs(hideBin(process.argv)).argv
-
 http.Agent({ maxSockets: 100 });
 dotenv.config({ path: '.env' });
 const app = express();
@@ -42,54 +28,17 @@ process.on('uncaughtException', err => {
 
 global.isDev = argv['dev'];
 global.isProd = argv['prod'];
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-/** Setup Security Headers */
-app.use(helmet());
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.use(favicon(path.join(__dirname, './public/assets', 'favicon.ico')));
-
-
-
-app.use(cookieParser());
-app.use(fileUpload());
-
-/** Sanitize Data */
-app.use(mongoSanitize());
-/** Prevent HTTP Parameter Pollution attacks */
-app.use(hpp({
-    whitelist: ['positions']
-}));
-/** Rate Limit */
-app.use(rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 mins
-    max: 100
-}));
-
-/** Setup Cors */
-app.use(cors());
 
 routes(app);
 
-// Handle unhandled routes
-app.all('*', (req, res, next) => {
-    next(new ErrorHandler(`${req.originalUrl} route not found`, 404));
-});
-
-/** Middleware to handle errors */
-app.use(errorMiddleware);
-
-
+import m from "./app/bootstrap.js";
+m(app);
 
 const port = process.env.PORT;
 const hostName = '127.0.0.1';
 const server = app.listen(port, hostName, () => {
     console.log(`🚀 Server started on http://${hostName}:${port}`);
 });
-
 // Handling Unhandled Promise Rejection
 process.on('unhandledRejection', err => {
     console.log(`Error: ${err.message}`);
@@ -98,4 +47,3 @@ process.on('unhandledRejection', err => {
         process.exit(1);
     })
 });
-
