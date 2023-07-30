@@ -31,7 +31,7 @@ global.isProd = argv['prod'];
 
 routes(app);
 
-import m from "./app/bootstrap.js";
+import m from "./app/setup.js";
 m(app);
 
 const port = process.env.PORT;
