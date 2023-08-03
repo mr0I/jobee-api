@@ -13,3 +13,9 @@ export const sanitizeObject = async (obj) => {
 
     return sanitizedObj;
 }
+
+export const parseOffsetLimit = (req) => {
+    const offset = Number.parseInt(req.query.offset || '0');
+    const limit = Number.parseInt(req.query.limit || '20');
+    return { offset, limit };
+}

@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Job from "../models/Job.js";
-import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
+import { asyncErrorHandler } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import sendToken from "../utils/jwtToken.js";
 import fs from "fs";

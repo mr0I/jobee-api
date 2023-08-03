@@ -2,7 +2,7 @@ import Job from "../models/Job.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
-import asyncErrorHandler from "../middlewares/catchAsyncErrors.js";
+import { asyncErrorHandler } from "../middlewares/catchAsyncErrors.js";
 import ApiFilters from "../utils/apiFilters.js";
 import path from "path";
 import fs from "fs";
@@ -201,7 +201,7 @@ class JobsController {
             return next(new ErrorHandler('Please upload document file.', 400))
         }
         // Check doucument size
-        if (file.size > process.env.MAX_FILE_SIZE) {
+        if (file.size > constants.maxFileSize) {
             return next(new ErrorHandler('Please upload file less than 2MB.', 400));
         }
         // Renaming resume

@@ -1,7 +1,10 @@
+import { asyncErrorRenderer } from "../middlewares/catchAsyncErrors.js";
+
 class IndexController {
-    static async home(req, res, next) {
+    static home = asyncErrorRenderer(async (req, res, next) => {
         res.render('home', { title: 'Home Page' })
-    }
+    });
+
 }
 
 
