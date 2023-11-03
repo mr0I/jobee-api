@@ -7,7 +7,7 @@ export const asyncErrorRenderer = function (callback) {
         try {
             await callback(req, res, next);
         } catch (e) {
-            res.status(500).render('not_found', {
+            res.status(500).render('error', {
                 layout: false,
                 error: global.isProd ? 'Fatal Error' : e
             });

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <style type="text/css">
+        body {
+            background-color: #000;
+        }
+
+        .error-container {
+            background-color: #181818;
+            width: 80%;
+            margin: 125px auto;
+            border-radius: 8px 8px 0 0;
+            border-top: 13px solid rgb(254, 85, 90);
+        }
+
+        .error-container .error-container-body {
+            width: 90%;
+            margin: 0 auto;
+            padding: 18px 36px;
+            border-bottom: 1px dotted #fff;
+        }
+
+        .error-container .error-container-body>h2 {
+            margin: 0;
+            padding: 0;
+            color: rgb(254, 85, 90);
+        }
+
+        .error-container .error-container-body>p {
+            padding-left: 36px;
+            color: #eee;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="error-container">
+        <div class="error-container-body">
+            <h2>{{ error.message }}</h2>
+            <p>{{ error.stack }}</p>
+        </div>
+        <div>
+            <p style="color: #fff;">{{error}}</p>
+        </div>
+    </section>
+</body>
+
+</html>
+
+
+<section></section>

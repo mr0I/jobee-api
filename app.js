@@ -34,7 +34,7 @@ routes(app);
 import m from "./app/setup.js";
 m(app);
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const hostName = '127.0.0.1';
 const server = app.listen(port, hostName, () => {
     console.log(`🚀 Server started on http://${hostName}:${port}`);
