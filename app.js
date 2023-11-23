@@ -29,6 +29,16 @@ process.on('uncaughtException', err => {
 global.isDev = argv['dev'];
 global.isProd = argv['prod'];
 
+// Cli operations
+import { ops as operations } from "./utils/ops.js";
+const op = argv['op'];
+if (op && operations[op]) {
+    operations[op]().then(res => {
+        console.log(res);
+    }).catch(e => console.error(e));
+}
+
+
 routes(app);
 
 import m from "./app/setup.js";
