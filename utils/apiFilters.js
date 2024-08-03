@@ -5,7 +5,8 @@ class ApiFilters {
     }
 
     filter() {
-        const queryCopy = { ...this.queryStr };
+        const queryCopy = { ...this.queryStr
+        };
 
         // Removing fields from the query
         const fieldsToRemove = ['sort', 'fields', 'q', 'limit', 'page'];
@@ -31,8 +32,8 @@ class ApiFilters {
         if (this.queryStr.fields) {
             const fields = (this.queryStr.fields).split(',').join(' ');
             this.query = this.query.select(fields);
-        }
-        else {
+            console.log(this.query);
+        } else {
             this.query = this.query.select('-__v');
         }
         return this;
@@ -41,7 +42,11 @@ class ApiFilters {
     searchByQuery() {
         if (this.queryStr.q) {
             const searchPhrase = (this.queryStr.q).split('-').join(' ');
-            this.query = this.query.find({ $text: { $search: searchPhrase } });
+            this.query = this.query.find({
+                $text: {
+                    $search: searchPhrase
+                }
+            });
         }
         return this;
     }

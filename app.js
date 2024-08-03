@@ -47,11 +47,17 @@ import m from "./app/setup.js";
 m(app);
 
 if (cluster.isPrimary && !isDev) {
+  console.log("clen: ", cpus().length);
   for (let i = 0; i < cpus().length; i++) {
     cluster.fork(); // Fork workers.
   }
+  cluster.on("online", (worker) => {
+    console.log(`worker id is ${worker.id} and pid is ${worker.process.pid}`);
+  });
   cluster.on("exit", (worker, code, signal) => {
     console.log(`worker ${worker.process.pid} died`);
+    console.log("forking new worker...");
+    cluster.fork();
   });
 } else {
   const port = process.env.PORT || 3000;

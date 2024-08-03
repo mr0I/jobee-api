@@ -1,8 +1,12 @@
 import Job from "../models/Job.js";
-import { nominatimClient } from "../utils/nominatimClient.js";
+import {
+    nominatimClient
+} from "../utils/nominatimClient.js";
 import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
-import { asyncErrorHandler } from "../middlewares/catchAsyncErrors.js";
+import {
+    asyncErrorHandler
+} from "../middlewares/catchAsyncErrors.js";
 import ApiFilters from "../utils/apiFilters.js";
 import path from "path";
 import fs from "fs";
@@ -31,6 +35,8 @@ class JobsController {
             .searchByQuery()
             .pagination();
 
+        // console.log(apiFilters.query);
+
         const jobs = await apiFilters.query;
         apiCache.set(cacheKey, jobs, constants.cacheTimeToLive);
 
@@ -42,14 +48,18 @@ class JobsController {
     });
 
     static getJob = asyncErrorHandler(async (req, res, next) => {
-        const { id, slug } = req.params;
+        const {
+            id,
+            slug
+        } = req.params;
 
         try {
             const job = await Job.find({
-                $and: [
-                    { _id: id },
-                    { slug: slug }
-                ]
+                $and: [{
+                    _id: id
+                }, {
+                    slug: slug
+                }]
             }).populate({
                 path: 'user',
                 select: 'name'
@@ -129,7 +139,10 @@ class JobsController {
     });
 
     static getNearbyJobs = asyncErrorHandler(async (req, res, next) => {
-        const { zipcode, distance } = req.params;
+        const {
+            zipcode,
+            distance
+        } = req.params;
         const loc = await nominatimClient.search({
             q: zipcode, // zipcode or address or etc
             addressdetails: '1'
@@ -139,7 +152,13 @@ class JobsController {
         const radius = distance / 3963;
 
         const jobs = await Job.find({
-            location: { $geoWithin: { $centerSphere: [[longitude, latitude], radius] } }
+            location: {
+                $geoWithin: {
+                    $centerSphere: [
+                        [longitude, latitude], radius
+                    ]
+                }
+            }
         });
 
         res.status(200).json({
@@ -151,17 +170,34 @@ class JobsController {
 
     static getStats = asyncErrorHandler(async (req, res, next) => {
         const topic = req.params.topic;
-        const stats = await Job.aggregate([
-            { $match: { $text: { $search: topic } } },
+        const stats = await Job.aggregate([{
+                $match: {
+                    $text: {
+                        $search: topic
+                    }
+                }
+            },
             // { $match: { $text: { $search: "\"" + topic + "\"" } } },
             {
                 $group: {
-                    _id: { $toUpper: '$experience' },
-                    totalJobs: { $sum: 1 },
-                    avgPositions: { $avg: '$positions' },
-                    avgSalary: { $avg: '$salary' },
-                    minSalary: { $min: '$salary' },
-                    maxSalary: { $max: '$salary' },
+                    _id: {
+                        $toUpper: '$experience'
+                    },
+                    totalJobs: {
+                        $sum: 1
+                    },
+                    avgPositions: {
+                        $avg: '$positions'
+                    },
+                    avgSalary: {
+                        $avg: '$salary'
+                    },
+                    minSalary: {
+                        $min: '$salary'
+                    },
+                    maxSalary: {
+                        $max: '$salary'
+                    },
                 }
             }
         ]);
