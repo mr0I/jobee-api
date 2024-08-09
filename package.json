@@ -32,6 +32,7 @@
     "node-geocoder": "^4.2.0",
     "nodemailer": "^6.9.3",
     "nominatim-client": "^3.2.1",
+    "redis": "^4.7.0",
     "serve-favicon": "^2.5.0",
     "slugify": "^1.6.6",
     "validator": "^13.9.0",

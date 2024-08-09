@@ -62,11 +62,12 @@ if (cluster.isPrimary && !isDev) {
 } else {
   const port = process.env.PORT || 3000;
   const hostName = "127.0.0.1";
-  const server = app.listen(port, hostName, () => {
-    console.log(
-      `🚀 Server started on http://${hostName}:${port} and worker ${process.pid}`
-    );
-  });
+  // const server = app.listen(port, hostName, () => {
+  //   console.log(
+  //     `🚀 Server started on http://${hostName}:${port} and worker ${process.pid}`
+  //   );
+  // });
+  const server = app.listen(process.argv[2]); // eg: node app.js 8080, node app.js 8081, node app.js 8082
 
   // Handling Unhandled Promise Rejection
   process.on("unhandledRejection", (err) => {
