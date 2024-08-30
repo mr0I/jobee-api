@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import redis from "redis";
-import * as config from "./constants.js";
 
 const connection = () => {
   mongoose
@@ -20,20 +18,4 @@ const connection = () => {
     });
 };
 
-(async () => {
-  const client = redis.createClient(config.redisHost, config.redisPort);
-  const subscriber = client.duplicate();
-  await subscriber.connect();
-  await subscriber.subscribe("requestsChannel", (message, channel) => {
-    console.log("msg: ", message);
-  });
-})();
-
-const publishClient = async () => {
-  return await redis
-    .createClient(config.redisHost, config.redisPort)
-    .on("error", (err) => console.log("Publish Client Error", err))
-    .connect();
-};
-
-export { connection as ConnectDb, publishClient };
+export { connection as ConnectDb };
