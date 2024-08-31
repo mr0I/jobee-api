@@ -46,6 +46,46 @@ class IndexController {
       result,
     });
   });
+
+  static getAllDogs = asyncErrorRenderer(async (req, res) => {
+    const result = await redisClient.ZRANGE("dog:last_lookup", 0, -1);
+    // latest dogs
+    const now = Date.now();
+    const minAgo = now - 60000;
+    const latest = await redisClient.ZRANGE("dog:last_lookup", now, minAgo);
+
+    redisClient.geoRadiusByMember;
+
+    res.status(200).send({
+      result,
+      latest,
+    });
+  });
+
+  static aroundSb = asyncErrorRenderer(async (req, res) => {
+    const { km } = req.params;
+    const result = await redisClient.geoRadiusByMember(
+      "places",
+      "Chicago",
+      km,
+      "km"
+    );
+    res.status(200).send({ result });
+  });
+
+  static aroundLL = asyncErrorRenderer(async (req, res) => {
+    const { km, long, lat } = req.params;
+    const result = await redisClient.geoRadius(
+      "places",
+      {
+        longitude: long,
+        latitude: lat,
+      },
+      parseInt(km),
+      "km"
+    );
+    res.status(200).send({ result });
+  });
 }
 
 export const index_controller = IndexController;

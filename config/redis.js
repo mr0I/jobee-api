@@ -17,6 +17,17 @@ const client = redis.createClient(config.redisHost, config.redisPort);
   client.SET("dog:name:gizmo", "dog:1");
   client.SET("dog:name:dexter", "dog:2");
   client.SET("dog:name:fido", "dog:3");
+  // client.geoAdd("places", [, , "South Bend"]);
+  client.geoAdd("places", {
+    longitude: 86.252,
+    latitude: 41.6764,
+    member: "South Bend",
+  });
+  client.geoAdd("places", {
+    longitude: 87.144,
+    latitude: 41.8755,
+    member: "Chicago",
+  });
 })();
 
 const publishClient = async () => {
