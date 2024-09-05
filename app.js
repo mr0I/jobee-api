@@ -10,6 +10,7 @@ import { cpus } from "os";
 dotenv.config({ path: ".env" });
 const argv = yargs(hideBin(process.argv)).argv;
 import { PORT as port } from "./config/configs.js";
+import { logger } from "./utils/logger.js";
 
 http.Agent({ maxSockets: 100 });
 const app = express();
@@ -62,7 +63,7 @@ if (cluster.isPrimary && !isDev) {
 } else {
   const hostName = "127.0.0.1";
   const server = app.listen(port, hostName, () => {
-    console.log(
+    logger.info(
       `🚀 Server started on http://${hostName}:${port} and worker ${process.pid}`
     );
   });
