@@ -7,10 +7,11 @@ import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import cluster from "cluster";
 import { cpus } from "os";
-
-const argv = yargs(hideBin(process.argv)).argv;
-http.Agent({ maxSockets: 100 });
 dotenv.config({ path: ".env" });
+const argv = yargs(hideBin(process.argv)).argv;
+import { PORT as port } from "./config/configs.js";
+
+http.Agent({ maxSockets: 100 });
 const app = express();
 ConnectDb();
 
@@ -47,7 +48,6 @@ import m from "./app/setup.js";
 m(app);
 
 if (cluster.isPrimary && !isDev) {
-  console.log("clen: ", cpus().length);
   for (let i = 0; i < cpus().length; i++) {
     cluster.fork(); // Fork workers.
   }
@@ -60,7 +60,6 @@ if (cluster.isPrimary && !isDev) {
     cluster.fork();
   });
 } else {
-  const port = process.env.PORT || 3000;
   const hostName = "127.0.0.1";
   const server = app.listen(port, hostName, () => {
     console.log(
@@ -69,12 +68,23 @@ if (cluster.isPrimary && !isDev) {
   });
   // const server = app.listen(process.argv[2]); // eg: node app.js 8080, node app.js 8081, node app.js 8082 ## to use subscribe method
 
+  // Handling ctrl+c
+  process.on("SIGTERM", () => {
+    console.log("SIGTERM received!");
+    if (server) {
+      server.close();
+    }
+  });
   // Handling Unhandled Promise Rejection
   process.on("unhandledRejection", (err) => {
     console.log(`Error: ${err.message}`);
     console.log("Shutting down the server due to Unhandled promise rejection.");
-    server.close(() => {
+    if (server) {
+      server.close(() => {
+        process.exit(1);
+      });
+    } else {
       process.exit(1);
-    });
+    }
   });
 }

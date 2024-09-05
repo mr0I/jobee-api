@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import { DB_URL } from "../config/configs.js";
 
 const connection = () => {
   mongoose
-    .connect(process.env.DB_URL, {
+    .connect(DB_URL, {
       autoIndex: false, // Don't build indexes
       maxPoolSize: 10, // Maintain up to 10 socket connections
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
