@@ -11,6 +11,7 @@ dotenv.config({ path: ".env" });
 const argv = yargs(hideBin(process.argv)).argv;
 import { PORT as port } from "./config/configs.js";
 import { logger } from "./utils/logger.js";
+import { Server } from "socket.io";
 
 http.Agent({ maxSockets: 100 });
 const app = express();
@@ -68,6 +69,42 @@ if (cluster.isPrimary && !isDev) {
     );
   });
   // const server = app.listen(process.argv[2]); // eg: node app.js 8080, node app.js 8081, node app.js 8082 ## to use subscribe method
+
+  // socket.io
+  const io = new Server(server);
+  // io.on("connection", (socket) => {
+  //   socket.on("room.join", (room) => {
+  //     console.log(socket.rooms);
+  //     Object.keys(socket.rooms)
+  //       .filter((r) => r != socket.id)
+  //       .forEach((r) => socket.leave(r));
+
+  //     setTimeout(() => {
+  //       socket.join(room);
+  //       socket.emit("event", `joined room ${room}`);
+  //       socket.broadcast.to(room).emit("event", `someone joined room ${room}`);
+  //     }, 0);
+  //   });
+
+  //   socket.on("event", (e) => {
+  //     socket.broadcast.to(e.room).emit("event", `${e.name} says hello`);
+  //   });
+  // });
+
+  // socket.io using namespaces
+  const namespaceHandler = (namespace) => {
+    return (socket) => {
+      socket.emit("event", "You joined " + namespace.name);
+      //just resend it
+      socket.on("event", (data) => {
+        socket.broadcast.emit("event", data);
+      });
+    };
+  };
+  const one = io.of("/namespace1");
+  const two = io.of("/namespace2");
+  one.on("connection", namespaceHandler(one));
+  two.on("connection", namespaceHandler(two));
 
   // Handling ctrl+c
   process.on("SIGTERM", () => {

@@ -86,6 +86,14 @@ class IndexController {
     );
     res.status(200).send({ result });
   });
+
+  static simpleRoom = asyncErrorRenderer(async (req, res) => {
+    return res.render("rooms");
+  });
+
+  static namespaceRoom = asyncErrorRenderer(async (req, res) => {
+    return res.render("namespace-room");
+  });
 }
 
 export const index_controller = IndexController;

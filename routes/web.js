@@ -12,4 +12,10 @@ export const web = (app) => {
     limiter.pageLimiter,
     index_controller.aroundLL
   );
+  app.get("/room", limiter.pageLimiter, index_controller.simpleRoom);
+  app.get(
+    "/namespace-room",
+    limiter.pageLimiter,
+    index_controller.namespaceRoom
+  );
 };
