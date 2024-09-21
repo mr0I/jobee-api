@@ -14,6 +14,7 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import morgan from "morgan";
+import { xss } from "express-xss-sanitizer";
 import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,13 +34,26 @@ export default (app) => {
     stream: accessLogStream,
   });
   app.use(reqLogger);
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          fontSrc: ["'self'", "'fonts.gstatic.com'"],
+        },
+        reportOnly: false,
+      },
+    })
+  );
   app.use(express.static("public"));
   app.use(favicon(path.join(__dirname, "../public/assets", "favicon.ico")));
   app.use(cookieParser());
   app.use(fileUpload());
+  app.use(xss);
   /** Sanitize Data */
-  app.use(mongoSanitize());
+  app.use(mongoSanitize()); // prevent no sql injection
   /** Prevent HTTP Parameter Pollution attacks */
   app.use(
     hpp({
@@ -54,7 +68,13 @@ export default (app) => {
     })
   );
   /** Setup Cors */
-  app.use(cors());
+  if (global.isProd) {
+    app.use(cors({ origin: "url" }));
+    app.options("*", cors({ origin: "url" }));
+  } else {
+    app.use(cors());
+    app.options("*", cors());
+  }
   /** Viewengine */
   app.engine("handlebars", engine());
   app.set("view engine", "handlebars");
