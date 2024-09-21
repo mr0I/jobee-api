@@ -1,9 +1,8 @@
 import redis from "redis";
-import * as config from "./constants.js";
+import * as config from "../config/constants.js";
 
 const client = redis.createClient(config.redisHost, config.redisPort);
 (async () => {
-  await client.connect();
   const subscriber = client.duplicate();
   await subscriber.connect();
   await subscriber.subscribe("requestsChannel", (message, channel) => {
@@ -28,19 +27,11 @@ const client = redis.createClient(config.redisHost, config.redisPort);
     member: "Chicago",
   });
 })();
-
 const publishClient = async () => {
   return await redis
     .createClient(config.redisHost, config.redisPort)
     .on("error", (err) => console.log("Publish Client Error", err))
     .connect();
 };
-
-// const promiser = (resolve, reject) => {
-//   return (err, data) => {
-//     if (err) reject(err);
-//     resolve(data);
-//   };
-// };
 
 export { publishClient, client as redisClient };

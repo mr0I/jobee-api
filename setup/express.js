@@ -1,6 +1,5 @@
 import express from "express";
 import errorMiddleware from "../middlewares/errors.js";
-import ErrorHandler from "../utils/errorHandler.js";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
@@ -19,7 +18,7 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default (app) => {
+export default async (app) => {
   app.use(bodyParser.json({ limit: "8mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
   /** logging request info */

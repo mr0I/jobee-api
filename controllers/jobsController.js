@@ -1,6 +1,5 @@
 import Job from "../models/Job.js";
 import { nominatimClient } from "../utils/nominatimClient.js";
-import validator from "validator";
 import ErrorHandler from "../utils/errorHandler.js";
 import { asyncErrorHandler } from "../middlewares/catchAsyncErrors.js";
 import ApiFilters from "../utils/apiFilters.js";
@@ -8,7 +7,7 @@ import path from "path";
 import fs from "fs";
 import constants from "../config/constants.js";
 import nodeCache from "node-cache";
-import { redisClient } from "../config/redis.js";
+import { redisClient } from "../setup/redis.js";
 const apiCache = new nodeCache();
 
 class JobsController {
@@ -71,6 +70,7 @@ class JobsController {
   static createJob = asyncErrorHandler(async (req, res, next) => {
     req.body.user = req.user.id;
     const job = await Job.create(req.body);
+    redisClient.del("stats");
 
     res.status(201).json({
       success: true,
@@ -155,22 +155,6 @@ class JobsController {
     const longitude = loc[0].lon;
     const radius = distance / 3963;
 
-    // redis cache
-    try {
-      const jobs = await redisClient.get("nearby_jobs");
-      if (jobs) {
-        console.log("cached :)");
-
-        return res.status(200).json({
-          count: jobs.length,
-          data: jobs,
-          loc: loc,
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-
     const jobs = await Job.find({
       location: {
         $geoWithin: {
@@ -178,9 +162,6 @@ class JobsController {
         },
       },
     });
-    console.log("not cached :(");
-
-    await redisClient.set("nearby_jobs", JSON.stringify(jobs));
 
     res.status(200).json({
       count: jobs.length,
@@ -227,6 +208,7 @@ class JobsController {
     if (stats.length === 0) {
       return next(new ErrorHandler(`No stats found for ${topic}`, 404));
     }
+    redisClient.set("stats", JSON.stringify(stats));
 
     res.status(200).json({
       data: stats,

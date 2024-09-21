@@ -1,21 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
 import { routes } from "./routes/index.js";
-import { ConnectDb } from "./config/db.js";
 import http from "http";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import cluster from "cluster";
 import { cpus } from "os";
-dotenv.config({ path: ".env" });
 const argv = yargs(hideBin(process.argv)).argv;
 import { PORT as port } from "./config/configs.js";
 import { logger } from "./utils/logger.js";
 import { Server } from "socket.io";
-
+import setup from "./setup/index.js";
+dotenv.config({ path: ".env" });
 http.Agent({ maxSockets: 100 });
 const app = express();
-ConnectDb();
 
 // Handling Uncaught Exception
 process.on("uncaughtException", (err) => {
@@ -45,9 +43,7 @@ if (op && operations[op]) {
 }
 
 routes(app);
-
-import m from "./app/setup.js";
-m(app);
+setup(app);
 
 if (cluster.isPrimary && !isDev) {
   for (let i = 0; i < cpus().length; i++) {

@@ -1,7 +1,6 @@
-import { publishClient } from "../config/redis.js";
+import { publishClient, redisClient } from "../setup/redis.js";
 import { asyncErrorRenderer } from "../middlewares/catchAsyncErrors.js";
 // import Job from "../models/Job.js";
-import { redisClient } from "../config/redis.js";
 
 class IndexController {
   static home = asyncErrorRenderer(async (req, res, next) => {
