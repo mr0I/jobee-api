@@ -15,10 +15,27 @@ import { fileURLToPath } from "url";
 import morgan from "morgan";
 import { xss } from "express-xss-sanitizer";
 import fs from "fs";
+import { ops as operations } from "../utils/ops.js";
+import { hideBin } from "yargs/helpers";
+import yargs from "yargs/yargs";
+const argv = yargs(hideBin(process.argv)).argv;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default async (app) => {
+  global.isDev = argv["dev"];
+  global.isProd = argv["prod"];
+
+  // Cli operations
+  const op = argv["op"];
+  if (op && operations[op]) {
+    operations[op]()
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((e) => console.error(e));
+  }
+
   app.use(bodyParser.json({ limit: "8mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
   /** logging request info */
